@@ -1,0 +1,8 @@
+<div class="field">
+    <div class="heading">
+        <label class="font-bold">QR Code</label>
+    </div>
+    <div class="qrm-w-full qrm-pb-6">
+        {% include "qr-manager/qr/_code" with {id: id, element: element, entryUri: entryUri} %}
+    </div>
+</div>

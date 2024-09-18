@@ -1,0 +1,126 @@
+{# @var plugin \weiperio\craftqrmanager\QrManager #}
+{# @var settings \weiperio\craftqrmanager\models\Settings #}
+
+{# {% set title = "Settings"|t('app') %}
+{% set elementType = 'weiperio\\craftqrmanager\\elements\\Route' %}
+
+{% block actionButton %}
+    <button href="{{ url('qr-manager/routes/create') }}" id="add-route-btn" class="btn submit">Save Settings</button>
+{% endblock %}
+
+{% do view.registerTranslations('app', [
+    "Route Settings",
+]) %}
+
+{% set crumbs = [
+    { label: "QR Manager"|t('app') }
+] %}
+
+{% extends '_layouts/cp.twig' %}
+#}
+{% import '_includes/forms.twig' as forms %} 
+
+{% block content %}
+<div class="qrm-flex qrm-items-start">
+<div class="qrm-flex-1">
+<h2>{{ "QR Settings"|t('app') }}</h2>
+<p>Define a custom QR code to suit your brand.</p>
+
+<input type="hidden" name="action" value="plugins/save-plugin-settings">
+
+{# Color field #}
+{{ forms.colorField({
+  label: "Foreground Color"|t('app'),
+  instructions: "The foreground color of the QR code. For maximum compatibility foreground color must be darker than the background color."|t('app'),
+  id: 'foregroundColor',
+  name: 'foregroundColor',
+  value: settings.foregroundColor,
+}) }}
+
+{# Background color field #}
+{{ forms.colorField({
+  label: "Background Color"|t('app'),
+  instructions: "The background color of the QR code."|t('app'),
+  id: 'backgroundColor',
+  name: 'backgroundColor',
+  value: settings.backgroundColor,
+}) }}
+
+{% set logoElements = [] %}
+{% if settings.logo %}
+  {# Fetch asset #}
+  {% set logo = craft.assets.id(settings.logo[0]).one() %}
+  {% set logoElements = [logo] %}
+{% endif %}
+
+{# Logo asset field #}
+{{ forms.elementSelectField({
+  label: "Logo"|t('app'),
+  elementType: 'craft\\elements\\Asset',
+  instructions: "The logo to overlay on the QR code."|t('app'),
+  id: 'logo',
+  name: 'logo',
+  limit: 1,
+  criteria: { kind: ['image'] },
+  elements: logoElements,
+}) }}
+
+{# Logo size field #}
+{{ forms.textField({
+  label: "Logo Size"|t('app'),
+  type: "number",
+  instructions: "The size of the logo, use a value between 0 and 0.5."|t('app'),
+  id: 'logoSize',
+  name: 'logoSize',
+  max: 0.8,
+  step: 0.1,
+  min: 0,
+  value: settings.logoSize,
+}) }}
+
+{# Logo margin field #}
+{{ forms.textField({
+  label: "Logo Margin"|t('app'),
+  type: "number",
+  instructions: "The margin around the logo in pixels."|t('app'),
+  id: 'logoMargin',
+  name: 'logoMargin',
+  value: settings.logoMargin,
+}) }}
+
+{# Error correction field #}
+{{ forms.selectField({
+  label: "Error Correction"|t('app'),
+  instructions: "The error correction level of the QR code. Using any value other than High may result in code readability issues."|t('app'),
+  id: 'errorCorrectionLevel',
+  name: 'errorCorrectionLevel',
+  options: [
+    { label: "Low", value: "L" },
+    { label: "Medium", value: "M" },
+    { label: "Quartile", value: "Q" },
+    { label: "High", value: "H" },
+  ],
+  value: settings.errorCorrectionLevel,
+}) }}
+</div>
+<div>
+<h2>{{ "Preview"|t('app') }}</h2>
+<div class="field">
+    <div class="qrm-w-full qrm-pb-6">
+        {% include "qr-manager/qr/_code" with {id: 'preview'} %}
+    </div>
+</div>
+</div>
+
+{# Route field #}
+
+{# {{ forms.fieldLayoutDesignerField({
+  fieldLayout: craft.app.fields.getLayoutByType(
+    'weiperio\\craftqrmanager\\elements\\Route'
+  ),
+}) }} #}
+{% endblock %}
+
+{% block details %}
+{% endblock %}
+{# ... #}

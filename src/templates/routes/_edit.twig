@@ -1,0 +1,33 @@
+{% extends '_layouts/cp.twig' %}
+{% import '_includes/forms.twig' as forms %}
+
+{% set title = 'Edit Route'|t('qr-manager') %}
+{% set fullPageForm = true %}
+
+{% block content %}
+  {# Have the form submit to a qr-manager/routes/save controller action #}
+  {{ actionInput('qr-manager/routes/save') }}
+  
+  {# Have the save action redirect to /qr-manager/routes afterward #}
+  {{ redirectInput('qr-manager/routes') }}
+  
+  {{ forms.dateField({
+    label: 'Start Date'|t('plugin-handle'),
+    instructions: 'The start date of the route.'|t('plugin-handle'),
+    id: 'start-date',
+    name: 'startDate',
+    value: route ?? route.startDate,
+    required: true,
+    errors: route ?? route.getErrors('startDate'),
+  }) }}
+  
+  {{ forms.dateField({
+    label: 'End Date'|t('plugin-handle'),
+    instructions: 'The end date of the route.'|t('plugin-handle'),
+    id: 'end-date',
+    name: 'endDate',
+    value: route ?? route.endDate,
+    required: true,
+    errors: route ?? route.getErrors('endDate'),
+  }) }}
+{% endblock %}

@@ -1,0 +1,44 @@
+<fieldset>
+    <legend class="h6">QR Codes</legend>
+    <div class="field">
+        <div class="qrm-w-full">
+            <div class="qrm-w-full">
+                <div class="qrm-w-full">
+                    {# If there are no routes, display a message #}
+                    {% if routes|length == 0 %}
+                        <p>No QR Codes have been created for this entry.</p>
+                    {% else %}
+                        <ul>
+                        {# Loop through the routes and display the QR Code #}
+                        {% for elementChip in chips %}
+                            {{ elementChip | raw }}
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+<hr />
+
+{% set settings = craft.app.plugins.getPlugin('qr-manager').settings %}
+
+{% do view.registerAssetBundle("weiperio\\craftqrmanager\\web\\assets\\qrmanagerbundle\\QrManagerBundleAsset") %}
+
+{% js %}
+    if (!window.QR_MANAGER_CONFIG) {
+        window.QR_MANAGER_CONFIG = {};
+    }
+    window.QR_MANAGER_CONFIG.SITE_BASE_URL = "{{ siteUrl }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_FOREGROUND_COLOR = "{{ settings.foregroundColor }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_BACKGROUND_COLOR = "{{ settings.backgroundColor }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_LOGO_SIZE = "{{ settings.logoSize }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_LOGO_MARGIN = "{{ settings.logoMargin }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_ERROR_CORRECTION = "{{ settings.errorCorrectionLevel }}";
+    {% if settings.logo %}
+    {% set logo = craft.assets.id(settings.logo[0]).one() %}
+    window.QR_MANAGER_CONFIG.QR_CODE_LOGO = "{{ logo.url }}";
+    {% endif %}
+    
+{% endjs %}
