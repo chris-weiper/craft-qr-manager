@@ -25,7 +25,8 @@ __webpack_require__.r(__webpack_exports__);
         redirectUri: null,
         fourgroundColor: null,
         backgroundColor: null,
-        logo: null
+        logo: null,
+        dotOptions: null
       },
       canvas: null
     };
@@ -47,18 +48,20 @@ __webpack_require__.r(__webpack_exports__);
       var entryUri = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
       var name = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
       console.log(window.QR_MANAGER_CONFIG.QR_CODE_FOREGROUND_COLOR, window.QR_MANAGER_CONFIG.QR_CODE_BACKGROUND_COLOR);
+      var qrCodeUrl = window.QR_MANAGER_CONFIG.SITE_BASE_URL + (entryUri ? entryUri : this.elements.inputs.entryUri ? this.elements.inputs.entryUri.value : "");
+      console.log(window.QR_MANAGER_CONFIG.SITE_BASE_URL, qrCodeUrl);
       var config = {
         width: 1000,
         height: 1000,
         type: download ? "svg" : "canvas",
         margin: 50,
-        data: window.SITE_BASE_URL + (download && entryUri ? entryUri : this.elements.inputs.entryUri ? this.elements.inputs.entryUri.value : ""),
+        data: qrCodeUrl,
         qrOptions: {
           errorCorrectionLevel: this.elements.inputs.errorCorrectionLevel ? this.elements.inputs.errorCorrectionLevel.value : window.QR_MANAGER_CONFIG.QR_CODE_ERROR_CORRECTION ? window.QR_MANAGER_CONFIG.QR_CODE_ERROR_CORRECTION : "H"
         },
         dotsOptions: {
           color: this.elements.inputs.foregroundColor ? "#" + this.elements.inputs.foregroundColor.value : window.QR_MANAGER_CONFIG.QR_CODE_FOREGROUND_COLOR ? "#" + window.QR_MANAGER_CONFIG.QR_CODE_FOREGROUND_COLOR : "#000000",
-          type: "rounded"
+          type: this.elements.inputs.dotOptions ? this.elements.inputs.dotOptions.value : window.QR_MANAGER_CONFIG.QR_CODE_DOT_OPTIONS ? window.QR_MANAGER_CONFIG.QR_CODE_DOT_OPTIONS : "rounded"
         },
         backgroundOptions: {
           color: this.elements.inputs.backgroundColor ? "#" + this.elements.inputs.backgroundColor.value : window.QR_MANAGER_CONFIG.QR_CODE_BACKGROUND_COLOR ? "#" + window.QR_MANAGER_CONFIG.QR_CODE_BACKGROUND_COLOR : "#ffffff"
@@ -148,6 +151,7 @@ __webpack_require__.r(__webpack_exports__);
         this.elements.inputs.logoSize.addEventListener('change', this.generateQrCodes.bind(this));
         this.elements.inputs.logoMargin.addEventListener('change', this.generateQrCodes.bind(this));
         this.elements.inputs.errorCorrectionLevel.addEventListener('change', this.generateQrCodes.bind(this));
+        this.elements.inputs.dotOptions.addEventListener('change', this.generateQrCodes.bind(this));
       }
 
       // Check for download buttons
@@ -176,6 +180,7 @@ __webpack_require__.r(__webpack_exports__);
       this.elements.inputs.logo = document.querySelector('#settings-logo .element[data-url]');
       this.elements.inputs.logoSize = document.querySelector('#settings-logoSize');
       this.elements.inputs.logoMargin = document.querySelector('#settings-logoMargin');
+      this.elements.inputs.dotOptions = document.querySelector('#settings-dotOptions');
 
       // Add event listeners
       this.addEventListeners();

@@ -10,5 +10,6 @@ abstract class Table
     /** @since 1.0.0 */
     public const ROUTES = '{{%qr_manager_routes}}';
     public const ROUTES_ANALYTICS = '{{%qr_manager_routes_analytics}}';
+    public const SITE_SETTINGS = '{{%qr_manager_site_settings}}';
 
 }

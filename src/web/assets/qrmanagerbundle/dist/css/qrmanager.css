@@ -507,11 +507,23 @@ video {
 .qrm-relative {
   position: relative;
 }
+.qrm-sticky {
+  position: sticky;
+}
 .qrm-right-2 {
   right: 0.5rem;
 }
 .qrm-top-2 {
   top: 0.5rem;
+}
+.qrm-top-0 {
+  top: 0px;
+}
+.qrm-top-12 {
+  top: 3rem;
+}
+.qrm-top-16 {
+  top: 4rem;
 }
 .qrm-m-auto {
   margin: auto;

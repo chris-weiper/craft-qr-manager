@@ -39,13 +39,11 @@ class Install extends Migration
             null
         );
 
-
         // Create analytics table
         $this->createTable(Table::ROUTES_ANALYTICS, [
             'id' => $this->primaryKey(),
             'routeId' => $this->integer()->notNull(),
             'dateRouted' => $this->dateTime()->notNull(),
-            'ipAddress' => $this->string(),
             'userAgent' => $this->string(),
             'referrer' => $this->string()
         ]);
@@ -56,6 +54,23 @@ class Install extends Migration
             Table::ROUTES_ANALYTICS,
             'routeId',
             Table::ROUTES,
+            'id',
+            'CASCADE',
+            null
+        );
+
+        // Create site settings table
+        $this->createTable(Table::SITE_SETTINGS, [
+            'id' => $this->primaryKey(),
+            'settings' => $this->json()
+        ]);
+
+        // Give it a foreign key to the routes table:
+        $this->addForeignKey(
+            null,
+            Table::SITE_SETTINGS,
+            'id',
+            '{{%sites}}',
             'id',
             'CASCADE',
             null
@@ -75,6 +90,9 @@ class Install extends Migration
 
         // Drop the qr_manager_routes table
         $this->dropTableIfExists(Table::ROUTES);
+
+        // Drop the qr_manager_routes table
+        $this->dropTableIfExists(Table::SITE_SETTINGS);
 
         return true;
     }
