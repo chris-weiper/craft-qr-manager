@@ -13,8 +13,8 @@ Create a QR Code</button>
         // Post the redirect URI to the controller action
         const slideout = new Craft.CpScreenSlideout('qr-manager/routes/create', {
             params : {
-                title: '',
-                redirectUri: "{{ redirectUri }}"
+                title: '{{ entry.title }}',
+                redirectUri: "{{ redirectUri }}",
             }
         })
 

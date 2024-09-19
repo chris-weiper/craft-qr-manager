@@ -50,7 +50,7 @@ class RoutesController extends Controller
     public function actionCreate(): Response
     {
         $route = Craft::createObject(RouteElement::class);
-        $route->title = Craft::t('qr-manager', Craft::$app->getRequest()->getParam('redirectUri') ?? '');
+        $route->title = Craft::t('qr-manager', Craft::$app->getRequest()->getParam('title') . ' - ' ?? '');
         // Get the redirect uri param
         $redirectUri = Craft::$app->getRequest()->getParam('redirectUri');
         if ($redirectUri != null) {
@@ -132,18 +132,24 @@ class RoutesController extends Controller
             // Craft::$app->elements->saveElement($route, false);
         }
 
-        // Check for selected site param
-        $selectedSite = Craft::$app->getRequest()->getParam('site');
-        if ($selectedSite) {
-            $selectedSiteId = Craft::$app->getSites()->getSiteByHandle($selectedSite)->id;
+        $site = Craft::$app->getSites()->getCurrentSite();
+        $siteId = $site->id;
+        // Check if the request has a siteHandle
+        $siteHandle = Craft::$app->getRequest()->getParam('site');
+        if ($siteHandle) {
+            // Get the site id using the siteHandle
+            $site = Craft::$app->getSites()->getSiteByHandle($siteHandle);
+            $siteId = $site->id;
         }
+        $siteSettings = QrManager::getInstance()->settingsService->getSiteSettings($siteId);
 
         // Call the element edit controller as cpScreen
         return $this->asCpScreen(Craft::$app->runAction('elements/edit', [
             'elementType' => RouteElement::class,
             'elementId' => $route->id,
             'element' => $route,
-            'selectedSiteId' => $selectedSiteId ?? null,
+            'selectedSiteId' => $siteId ?? null,
+            'settings' => $siteSettings,
         ]));
     }
 }

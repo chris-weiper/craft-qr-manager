@@ -3,26 +3,26 @@
 namespace weiperio\craftqrmanager;
 
 use Craft;
+use craft\base\Element;
 use craft\base\Model;
 use craft\base\Plugin;
-use craft\base\Element;
+use craft\events\DefineHtmlEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterCpNavItemsEvent;
 use craft\events\RegisterUrlRulesEvent;
-use craft\events\DefineHtmlEvent;
+use craft\helpers\Cp as CpHelper;
 use craft\services\Elements;
 use craft\web\ErrorHandler;
 use craft\web\Response;
 use craft\web\UrlManager;
-use craft\helpers\Cp as CpHelper;
-use yii\base\Application;
 use craft\web\twig\variables\Cp;
 use weiperio\craftqrmanager\elements\Route;
 use weiperio\craftqrmanager\models\Settings;
 use weiperio\craftqrmanager\services\QrService;
 use weiperio\craftqrmanager\services\Routes;
+use weiperio\craftqrmanager\services\Settings as SettingsAlias;
+use yii\base\Application;
 use yii\base\Event;
-
 
 /**
  * QR Manager plugin
@@ -34,6 +34,7 @@ use yii\base\Event;
  * @license https://craftcms.github.io/license/ Craft License
  * @property-read QrService $qrService
  * @property-read Routes $routes
+ * @property-read SettingsAlias $settings
  */
 class QrManager extends Plugin
 {
@@ -43,7 +44,7 @@ class QrManager extends Plugin
     public static function config(): array
     {
         return [
-            'components' => ['qrService' => QrService::class, 'routes' => Routes::class],
+            'components' => ['qrService' => QrService::class, 'routes' => Routes::class, 'settingsService' => SettingsAlias::class],
         ];
     }
 
@@ -61,6 +62,23 @@ class QrManager extends Plugin
     protected function createSettingsModel(): ?Model
     {
         return Craft::createObject(Settings::class);
+    }
+
+    public function getSettingsResponse(): mixed
+    {
+        $site = Craft::$app->getSites()->getCurrentSite();
+        $siteId = $site->id;
+        // Check if the request has a siteHandle
+        $siteHandle = Craft::$app->getRequest()->getParam('site');
+        if ($siteHandle) {
+            // Get the site id using the siteHandle
+            $site = Craft::$app->getSites()->getSiteByHandle($siteHandle);
+            $siteId = $site->id;
+        }
+        $siteSettings = $this->settingsService->getSiteSettings($siteId);
+        return \Craft::$app
+            ->controller
+            ->renderTemplate('qr-manager/_settings', ['settings' => $siteSettings, 'selectedSite' => $site, 'siteUrl' => $site->baseUrl]);
     }
 
     protected function settingsHtml(): ?string
@@ -91,6 +109,7 @@ class QrManager extends Plugin
             $event->rules['qr-manager/routes/create/?'] = 'qr-manager/routes/create';
             $event->rules['qr-manager/routes/edit/?'] = 'qr-manager/routes/edit';
             $event->rules['qr-manager/routes/edit/<routeId:\\d+>'] = 'qr-manager/routes/edit';
+            $event->rules['qr-manager/settings/save-site-settings'] = 'qr-manager/settings/save-site-settings';
         });
 
         // Register CP Nav item
@@ -110,7 +129,7 @@ class QrManager extends Plugin
         Event::on(Element::class, Element::EVENT_DEFINE_ADDITIONAL_BUTTONS, function(DefineHtmlEvent $event) {
             $element = $event->sender;
             if ($element instanceof \craft\elements\Entry ) {
-                $event->html = Craft::$app->getView()->renderTemplate('qr-manager/entries/_button', ['redirectUri' => $element->uri]);
+                $event->html = Craft::$app->getView()->renderTemplate('qr-manager/entries/_button', ['redirectUri' => '/' . $element->uri, 'entry' => $element]);
             }
         });
 
@@ -131,8 +150,18 @@ class QrManager extends Plugin
                         'autoReload' => true
                     ]));
                 }
+                $site = Craft::$app->getSites()->getCurrentSite();
+                $siteId = $site->id;
+                // Check if the request has a siteHandle
+                $siteHandle = Craft::$app->getRequest()->getParam('site');
+                if ($siteHandle) {
+                    // Get the site id using the siteHandle
+                    $site = Craft::$app->getSites()->getSiteByHandle($siteHandle);
+                    $siteId = $site->id;
+                }
+                $siteSettings = $this->settingsService->getSiteSettings($siteId);
                 // Render the template
-                $event->html .= Craft::$app->getView()->renderTemplate('qr-manager/entries/_meta', ['routes' => $routes, 'chips' => $routeElementChips]);
+                $event->html .= Craft::$app->getView()->renderTemplate('qr-manager/entries/_meta', ['settings' => $siteSettings, 'routes' => $routes, 'chips' => $routeElementChips]);
             }
         });
 

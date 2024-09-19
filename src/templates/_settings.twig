@@ -1,24 +1,53 @@
-{# @var plugin \weiperio\craftqrmanager\QrManager #}
-{# @var settings \weiperio\craftqrmanager\models\Settings #}
+{% import '_includes/forms.twig' as forms %} 
 
-{# {% set title = "Settings"|t('app') %}
-{% set elementType = 'weiperio\\craftqrmanager\\elements\\Route' %}
+{% requireAdmin %}
 
-{% block actionButton %}
-    <button href="{{ url('qr-manager/routes/create') }}" id="add-route-btn" class="btn submit">Save Settings</button>
-{% endblock %}
-
-{% do view.registerTranslations('app', [
-    "Route Settings",
-]) %}
+{% extends "_layouts/cp" %}
+{% set title = "QR Manager" %}
+{% set docTitle = title ~ ' - ' ~ "Plugins"|t('app') %}
+{% set fullPageForm = true %}
 
 {% set crumbs = [
-    { label: "QR Manager"|t('app') }
+    { label: "Settings"|t('app'), url: url('settings') },
+    { label: "Plugins"|t('app'), url: url('settings/plugins') }
 ] %}
 
-{% extends '_layouts/cp.twig' %}
-#}
-{% import '_includes/forms.twig' as forms %} 
+  {% if selectableSites is not defined %}
+      {% if siteIds is defined %}
+          {% set selectableSites = craft.app.sites.getEditableSites()|filter(s => s.id in siteIds) %}
+      {% else %}
+          {% set selectableSites = craft.app.sites.getEditableSites() %}
+      {% endif %}
+  {% endif %}
+
+  {% if selectedSite is not defined %}
+      {% if selectedSiteId is defined %}
+          {% set selectedSite = craft.app.sites.getSiteById(selectedSiteId) %}
+      {% elseif requestedSite and requestedSite in selectableSites %}
+          {% set selectedSite = requestedSite %}
+      {% else %}
+          {% set selectedSite = selectableSites|length ? selectableSites|first : craft.app.sites.getPrimarySite() %}
+      {% endif %}
+  {% endif %}
+
+{% set crumbs = (crumbs ?? [])|push({
+    id: 'site-crumb',
+    icon: 'world',
+    label: selectedSite.name|t('site'),
+    menu: {
+        items: siteMenuItems(selectableSites, selectedSite),
+        label: 'Select site'|t('app')
+    }
+}) %}
+
+{% set formActions = [
+    {
+        label: 'Save and continue editing'|t('app'),
+        redirect: 'settings/plugins/qr-manager' ~ (selectedSite ? '?site=' ~ selectedSite.handle : ''),
+        shortcut: true,
+        retainScroll: true,
+    },
+] %}
 
 {% block content %}
 <div class="qrm-flex qrm-items-start">
@@ -26,7 +55,10 @@
 <h2>{{ "QR Settings"|t('app') }}</h2>
 <p>Define a custom QR code to suit your brand.</p>
 
-<input type="hidden" name="action" value="plugins/save-plugin-settings">
+<input type="hidden" name="action" value="qr-manager/settings/save-site-settings">
+<input type="hidden" name="siteHandle" value="{{ selectedSite.handle }}">
+
+{{ redirectInput('settings/plugins/qr-manager?site=' ~ selectedSite.handle) }}
 
 {# Color field #}
 {{ forms.colorField({
@@ -88,6 +120,23 @@
   value: settings.logoMargin,
 }) }}
 
+{# Dot options field #}
+{{ forms.selectField({
+  label: "Dot options"|t('app'),
+  instructions: "Customize the look of your branded QR code by changing your dot options."|t('app'),
+  id: 'dotOptions',
+  name: 'dotOptions',
+  options: [
+    { label: "Rounded", value: "rounded" },
+    { label: "Dots", value: "dots" },
+    { label: "Classy", value: "classy" },
+    { label: "Classy Rounded", value: "classy-rounded" },
+    { label: "Square", value: "square" },
+    { label: "Extra Rounded", value: "extra-rounded" },
+  ],
+  value: settings.dotOptions,
+}) }}
+
 {# Error correction field #}
 {{ forms.selectField({
   label: "Error Correction"|t('app'),
@@ -103,7 +152,7 @@
   value: settings.errorCorrectionLevel,
 }) }}
 </div>
-<div>
+<div class="qrm-sticky qrm-top-16">
 <h2>{{ "Preview"|t('app') }}</h2>
 <div class="field">
     <div class="qrm-w-full qrm-pb-6">
@@ -111,16 +160,5 @@
     </div>
 </div>
 </div>
-
-{# Route field #}
-
-{# {{ forms.fieldLayoutDesignerField({
-  fieldLayout: craft.app.fields.getLayoutByType(
-    'weiperio\\craftqrmanager\\elements\\Route'
-  ),
-}) }} #}
 {% endblock %}
 
-{% block details %}
-{% endblock %}
-{# ... #}

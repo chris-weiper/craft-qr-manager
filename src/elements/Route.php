@@ -288,11 +288,25 @@ class Route extends Element implements ElementInterface
 
     public function metaFieldsHtml(bool $static): string
     {
+
+        $site = Craft::$app->getSites()->getCurrentSite();
+        $siteId = $site->id;
+        // Check if the request has a siteHandle
+        $siteHandle = Craft::$app->getRequest()->getParam('site');
+        if ($siteHandle) {
+            // Get the site id using the siteHandle
+            $site = Craft::$app->getSites()->getSiteByHandle($siteHandle);
+            $siteId = $site->id;
+        }
+        $siteSettings = QrManager::getInstance()->settingsService->getSiteSettings($siteId);
+
         // Render the metaFields twig file
         return Craft::$app->getView()->renderTemplate('qr-manager/routes/_metafields', [
             'element' => $this,
             'id' => $this->id,
             'entryUri' => $this->entryUri,
+            'settings' => $siteSettings,
+            'siteUrl' => $site->baseUrl,
         ]);
 
     }
