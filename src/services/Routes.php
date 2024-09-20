@@ -64,7 +64,7 @@ class Routes extends Component
      * @param string $referrer
      * @return mixed
      */
-    public function addRouteAnalytics(int $routeId, string $ipAddress, string $userAgent, string $referrer)
+    public function addRouteAnalytics(int $routeId, string $userAgent, string $referrer)
     {
         $dateRouted = new DateTime();
         $db = Craft::$app->getDb();
@@ -72,7 +72,6 @@ class Routes extends Component
             ->insert(QrTable::ROUTES_ANALYTICS, [
                 'routeId' => $routeId,
                 'dateRouted' => Db::prepareDateForDb($dateRouted),
-                'ipAddress' => $ipAddress,
                 'userAgent' => $userAgent,
                 'referrer' => $referrer,
             ])

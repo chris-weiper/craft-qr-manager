@@ -188,12 +188,11 @@ class QrManager extends Plugin
 
                 if ($route) {
                     // Found an entry, gather analytics data
-                    $ipAddress = $request->getUserIP();
                     $userAgent = $request->getUserAgent();
                     $referer = $request->getReferrer() ?? "";
 
                     // Add the analytics data
-                    QrManager::getInstance()->routes->addRouteAnalytics($route->id, $ipAddress, $userAgent, $referer);
+                    QrManager::getInstance()->routes->addRouteAnalytics($route->id, $userAgent, $referer);
                     
                     // So redirect or render as needed
                     return Craft::$app->getResponse()->redirect($route->redirectUri); // Example redirection
