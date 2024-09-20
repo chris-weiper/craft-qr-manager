@@ -1,5 +1,8 @@
 # Release Notes for QR Manager
 
+## 5.0.2.1 - 2024-09-20
+- Fixed composer version/release mismatch
+
 ## 5.0.2 - 2024-09-20
 - Removed references to IP address from the Route Analytics table
 
