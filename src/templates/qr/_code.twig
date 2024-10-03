@@ -1,0 +1,25 @@
+{% js %}
+    if (!window.QR_MANAGER_CONFIG) {
+        window.QR_MANAGER_CONFIG = {};
+    }
+    window.QR_MANAGER_CONFIG.SITE_BASE_URL = "{{ siteUrl }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_FOREGROUND_COLOR = "{{ settings.foregroundColor }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_BACKGROUND_COLOR = "{{ settings.backgroundColor }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_LOGO_SIZE = "{{ settings.logoSize }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_LOGO_MARGIN = "{{ settings.logoMargin }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_ERROR_CORRECTION = "{{ settings.errorCorrectionLevel }}";
+    window.QR_MANAGER_CONFIG.QR_CODE_DOT_OPTIONS = "{{ settings.dotOptions }}";
+    {% if settings.logo %}
+    {% set logo = craft.assets.id(settings.logo[0]).one() %}
+    window.QR_MANAGER_CONFIG.QR_CODE_LOGO = "{{ logo.url }}";
+    {% endif %}
+{% endjs %}
+
+{% do view.registerAssetBundle("weiperio\\craftqrmanager\\web\\assets\\qrmanagerbundle\\QrManagerBundleAsset") %}
+
+<div class="qrm-relative qrm-p-4 qrm-border-2 qrm-w-full qrm-border-slate-200">
+    <div id="qr-code-{{id}}" class="qrm-w-48 qrm-h-48 qrm-m-auto *:qrm-w-full *:qrm-h-full" data-qr-manager-code="{{entryUri ?? ''}}" data-qr-manager-code-name="{{element is defined ? element.title : "preview-qr" }}"></div>
+    <div class="qrm-absolute h-4 w-4 qrm-top-2 qrm-right-2 qrm-p2">
+        {% if entryUri is defined %}<button id="qr-code-download-icon-{{id}}" type="button" class="btn" data-icon="download" aria-label="Download QR Code" data-qr-manager-download="{{entryUri}}" data-qr-manager-download-name="{{element.title}}"></button>{% endif %}
+    </div>
+</div>

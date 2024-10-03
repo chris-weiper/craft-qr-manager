@@ -1,0 +1,125 @@
+
+{% set title = "Routes"|t('app') %}
+{% set elementType = 'weiperio\\craftqrmanager\\elements\\Route' %}
+
+{% block actionButton %}
+    <a href="{{ url('qr-manager/routes/create/') }}" id="add-route-btn" class="btn submit add icon">{{ "New route"|t('app') }}</a>
+{% endblock %}
+
+{% extends '_layouts/cp.twig' %}
+
+{% set elementInstance = craft.app.elements.createElement(elementType) %}
+{% set title = title ?? elementInstance.pluralDisplayName() %}
+{% set context = 'index' %}
+
+{% if not elementInstance %}
+    {% exit 404 %}
+{% endif %}
+
+{% set sources = craft.app.elementSources.getSources(elementType, 'index', true) %}
+
+{% set showSiteMenu = (craft.app.getIsMultiSite() ? (showSiteMenu ?? 'auto') : false) %}
+{% if showSiteMenu is same as ('auto') %}
+    {% set showSiteMenu = elementInstance.isLocalized() %}
+{% endif %}
+
+{% if showSiteMenu %}
+    {% if selectableSites is not defined %}
+        {% if siteIds is defined %}
+            {% set selectableSites = craft.app.sites.getEditableSites()|filter(s => s.id in siteIds) %}
+        {% else %}
+            {% set selectableSites = craft.app.sites.getEditableSites() %}
+        {% endif %}
+    {% endif %}
+
+    {% if selectedSite is not defined %}
+        {% if selectedSiteId is defined %}
+            {% set selectedSite = craft.app.sites.getSiteById(selectedSiteId) %}
+        {% elseif requestedSite and requestedSite in selectableSites %}
+            {% set selectedSite = requestedSite %}
+        {% else %}
+            {% set selectedSite = selectableSites|length ? selectableSites|first : craft.app.sites.getPrimarySite() %}
+        {% endif %}
+    {% endif %}
+
+    {# {% set crumbs = (crumbs ?? [])|unshift({
+        id: 'site-crumb',
+        icon: 'world',
+        label: selectedSite.name|t('site'),
+        menu: {
+            items: siteMenuItems(selectableSites, selectedSite),
+            label: 'Select site'|t('site')
+        }
+    }) %} #}
+{% endif %}
+
+{% block contextMenu %}
+    {% if showSiteMenu %}
+    {% include "_elements/sitemenu" %}
+    {% endif %}
+{% endblock %}
+
+{% set canHaveDrafts = false %}
+
+{% block sidebar %}
+
+    {% if sources is not empty %}
+        {{ tag('a', {
+            class: 'btn skip-link',
+            href: '#elements',
+            html: 'Skip to {title}'|t('app', {title: title}),
+        }) }}
+
+        <nav aria-labelledby="source-heading">
+            <h2 id="source-heading" class="visually-hidden">{{ 'Sources'|t('app') }}</h2>
+            {% include "_elements/sources" %}
+        </nav>
+
+        <div id="source-actions" class="buttons"></div>
+    {% endif %}
+{% endblock %}
+
+
+{% block toolbar %}
+    {% include '_elements/toolbar' with {
+        showSiteMenu: false,
+    } %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="main element-index">
+        <span class="visually-hidden" role="status" data-status-message></span>
+        <a class="skip-link btn" href="#footer">{{ 'Skip to {title}'|t('app', { title: 'Footer'|t }) }}</a>
+        <div id="elements" class="elements busy">
+            <div class="update-spinner spinner spinner-absolute"></div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block footer %}
+    <div id="count-spinner" class="spinner small hidden"></div>
+    <div id="count-container" class="light">&nbsp;</div>
+    <div id="actions-container" class="flex"></div>
+    <div id="export-container">
+        <button type="button" id="export-btn" class="btn hidden" aria-expanded="false">{{ 'Export…'|t('app') }}</button>
+    </div>
+{% endblock %}
+
+
+{% block initJs %}
+    Craft.elementIndex = Craft.createElementIndex('{{ elementType|e("js") }}', $('#page-container'), {
+        elementTypeName: '{{ elementInstance.displayName()|e("js") }}',
+        elementTypePluralName: '{{ elementInstance.pluralDisplayName()|e("js") }}',
+        context: '{{ context }}',
+        storageKey: 'elementindex.{{ elementType|e("js") }}',
+        criteria: Craft.defaultIndexCriteria,
+        toolbarSelector: '#toolbar',
+        defaultSource: {{ (defaultSource ?? null)|json_encode|raw }},
+        defaultSourcePath: {{ (defaultSourcePath ?? null)|json_encode|raw }},
+        canHaveDrafts: {{ canHaveDrafts ? 'true' : 'false' }},
+    });
+{% endblock %}
+
+{% js block('initJs') %}
