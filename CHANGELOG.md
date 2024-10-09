@@ -1,5 +1,8 @@
 # Release Notes for QR Manager
 
+## 5.0.3.2 - 2024-10-09
+- Fixed a bug preventing non-multi site routes from being saved
+
 ## 5.0.3.1 - 2024-10-08
 - Removed League/Uri usage
 

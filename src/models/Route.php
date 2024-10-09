@@ -37,6 +37,10 @@ class Route extends Model
                 // Get the current site ID
                 $siteId = Craft::$app->getSites()->currentSite->id;
                 $site = Craft::$app->getRequest()->getParam('site');
+                // Check if the request has a siteHandle
+                if (!$site) {
+                    $site = Craft::$app->getSites()->getCurrentSite()->handle;
+                }
                 $siteId = Craft::$app->getSites()->getSiteByHandle($site)->id;
                 $elementId = Craft::$app->getRequest()->getParam('elementId');
 

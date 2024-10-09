@@ -116,6 +116,10 @@ class RoutesController extends Controller
         if ($routeId) {
             // Get site from request
             $site = Craft::$app->getRequest()->getParam('site');
+            // If the site is not set, use the current site
+            if (!$site) {
+                $site = Craft::$app->getSites()->getCurrentSite()->handle;
+            }
             $siteId = Craft::$app->getSites()->getSiteByHandle($site)->id;
             $route = QrManager::getInstance()->routes->getRouteById($routeId, $siteId);
 
@@ -151,5 +155,36 @@ class RoutesController extends Controller
             'selectedSiteId' => $siteId ?? null,
             'settings' => $siteSettings,
         ]));
+    }
+
+    /**
+     * qr-manager/routes/delete action
+     */
+    public function actionDelete(): Response
+    {
+        // Check the user permissions
+        $this->requirePermission('qr-manager:editRoutes');
+
+        $this->requirePostRequest();
+
+        $routeId = Craft::$app->getRequest()->getRequiredBodyParam('routeId');
+        $site = Craft::$app->getRequest()->getParam('site');
+        // If the site is not set, use the current site
+        if (!$site) {
+            $site = Craft::$app->getSites()->getCurrentSite()->handle;
+        }
+        $siteId = Craft::$app->getSites()->getSiteByHandle($site)->id;
+
+        $route = QrManager::getInstance()->routes->getRouteById($routeId, $siteId);
+
+        if (!$route) {
+            throw new NotFoundHttpException('Route not found');
+        }
+
+        if (!Craft::$app->getElements()->deleteElement($route)) {
+            return $this->asErrorJson('Couldn’t delete route.');
+        }
+
+        return $this->asJson(['success' => true]);
     }
 }
