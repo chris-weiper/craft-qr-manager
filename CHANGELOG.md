@@ -1,5 +1,8 @@
 # Release Notes for QR Manager
 
+## 5.0.3.1 - 2024-10-08
+- Removed League/Uri usage
+
 ## 5.0.3 - 2024-10-08
 - Added redirect count to route index view
 - Added redirect count to route edit page

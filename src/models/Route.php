@@ -23,16 +23,13 @@ class Route extends Model
             {
                 $value = $this->$attribute;
 
-                try {
-                    $uri = Uri::createFromString($value);
-            
-                    // Ensure scheme, host, or path is present
-                    if (!$uri->getScheme() && !$uri->getHost() && !$uri->getPath()) {
-                        $this->addError($attribute, 'Please enter a valid URI.');
-                        return;
-                    }
-                } catch (\League\Uri\Exception $e) {
+                // Split the URI into scheme, host, and path
+                $parts = parse_url($value);
+
+                // Ensure scheme, host, or path is present
+                if (!isset($parts['scheme']) && !isset($parts['host']) && !isset($parts['path'])) {
                     $this->addError($attribute, 'Please enter a valid URI.');
+                    return;
                 }
             }],
             [['entryUri'], function($attribute, $params) {
