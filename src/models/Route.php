@@ -35,29 +35,30 @@ class Route extends Model
                     $this->addError($attribute, 'Please enter a valid URI.');
                 }
             }],
-            [['entryUri', 'redirectUri'], function($attribute, $params) {
+            [['entryUri'], function($attribute, $params) {
                 // Make sure there is not a route belonging to the same site with the same entryUri or redirectUri
                 // Get the current site ID
-                // $siteId = Craft::$app->getSites()->currentSite->id;
-                // $site = Craft::$app->getRequest()->getParam('site');
-                // $siteId = Craft::$app->getSites()->getSiteByHandle($site)->id;
+                $siteId = Craft::$app->getSites()->currentSite->id;
+                $site = Craft::$app->getRequest()->getParam('site');
+                $siteId = Craft::$app->getSites()->getSiteByHandle($site)->id;
+                $elementId = Craft::$app->getRequest()->getParam('elementId');
 
-                // // Query for existing routes within this site that match either the entryUri or redirectUri,
-                // // Join the elements table to get the site ID
-                // // but exclude the current route if it has an ID
-                // $query = RouteElement::find()
-                //     ->siteId($siteId)
-                //     ->andWhere(['or', ['entryUri' => $this->entryUri], ['redirectUri' => $this->redirectUri]])
-                //     ->andWhere(['not', ['id' => $this->id]]);
+                // Query for existing routes within this site that match either the entryUri or redirectUri,
+                // Join the elements table to get the site ID
+                // but exclude the current route if it has an ID
+                $query = RouteElement::find()
+                    ->id('not ' . $elementId)
+                    ->siteId($siteId)
+                    ->andWhere(['or', ['entryUri' => $this->entryUri]]);
 
-                // $existingRoute = $query->one();
+                $existingRoute = $query->one();
 
-                // // If an existing route is found, add an error
-                // if ($existingRoute) {
-                //     $this->addError($attribute, 'A route with the same {attribute} already exists for this site.');
-                // } else {
-                //     $this->validate();
-                // }
+                // If an existing route is found, add an error
+                if ($existingRoute) {
+                    $this->addError($attribute, 'A route with the same entryUri already exists for this site.');
+                }
+
+                return;
             }],
         ]);
     }

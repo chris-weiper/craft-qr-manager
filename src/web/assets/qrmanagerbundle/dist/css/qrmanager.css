@@ -513,17 +513,11 @@ video {
 .qrm-right-2 {
   right: 0.5rem;
 }
-.qrm-top-2 {
-  top: 0.5rem;
-}
-.qrm-top-0 {
-  top: 0px;
-}
-.qrm-top-12 {
-  top: 3rem;
-}
 .qrm-top-16 {
   top: 4rem;
+}
+.qrm-top-2 {
+  top: 0.5rem;
 }
 .qrm-m-auto {
   margin: auto;
@@ -567,6 +561,10 @@ video {
 }
 .qrm-pb-6 {
   padding-bottom: 1.5rem;
+}
+.qrm-text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 .\*\:qrm-h-full > * {
   height: 100%;

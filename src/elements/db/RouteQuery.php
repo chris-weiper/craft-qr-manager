@@ -33,17 +33,16 @@ class RouteQuery extends ElementQuery
     }
     protected function beforePrepare(): bool
     {
-        // JOIN our `products` table:
         $this->joinElementTable(Table::ROUTES);
 
-        // SELECT the `price` and `currency` columns:
         $this->query->select([
             Table::ROUTES . '.entryUri',
             Table::ROUTES . '.redirectUri',
         ]);
 
         if ($this->entryUri) {
-            $this->subQuery->andWhere(Db::parseParam(Table::ROUTES . '.entryUri', $this->entryUri));
+            $entryUri = $this->entryUri;
+            $this->subQuery->andWhere(new Expression("`entryUri` REGEXP :entryUri", [':entryUri' => "^/?{$entryUri}"]));
         }
 
         if ($this->redirectUri) {

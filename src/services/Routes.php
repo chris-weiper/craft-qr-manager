@@ -77,4 +77,58 @@ class Routes extends Component
             ])
             ->execute();
     }
+
+    /**
+     * Returns the total number of times a route has been accessed
+     *
+     * @param int $routeId
+     * @return int
+     */
+    public function getRouteAnalyticsTotal(int $routeId): int
+    {
+        // Create raw SQL query
+        $query = 'SELECT COUNT(*) FROM ' . QrTable::ROUTES_ANALYTICS . ' WHERE routeId = :routeId';
+        $params = [':routeId' => $routeId];
+
+        // Execute query
+        $result = Craft::$app->getDb()->createCommand($query, $params)->queryScalar();
+
+        return $result;
+    }
+
+    /**
+     * Returns the number of times a route has been accessed each day
+     *
+     * @param int $routeId
+     * @param int $numberOfDays
+     * @return array
+     */
+    public function getRouteDailyAnalytics(int $routeId, int $numberOfDays): array
+    {
+        // Create raw SQL query
+        $query = 'SELECT DATE(dateRouted) AS date, COUNT(*) AS count FROM ' . QrTable::ROUTES_ANALYTICS . ' WHERE routeId = :routeId AND dateRouted >= DATE_SUB(CURDATE(), INTERVAL :numberOfDays DAY) GROUP BY DATE(dateRouted)';
+        $params = [':routeId' => $routeId, ':numberOfDays' => $numberOfDays];
+
+        // Execute query
+        $result = Craft::$app->getDb()->createCommand($query, $params)->queryAll();
+
+        return $result;
+    }
+
+    /**
+     * Deletes a route by its ID.
+     * 
+     * @param int $routeId
+     * @return bool
+     */
+    public function deleteRouteById(int $routeId): bool
+    {
+        $route = $this->getRouteById($routeId);
+
+        if (!$route) {
+            return false;
+        }
+
+        return Craft::$app->getElements()->deleteElement($route);
+    }
 }

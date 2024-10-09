@@ -65,7 +65,7 @@ class Route extends Element implements ElementInterface
 
     public static function trackChanges(): bool
     {
-        return true;
+        return false;
     }
 
     public static function hasTitles(): bool
@@ -172,6 +172,7 @@ class Route extends Element implements ElementInterface
             'dateUpdated' => ['label' => Craft::t('app', 'Date Updated')],
             'entryUri' => 'Entry URI',
             'redirectUri' => 'Redirect URI',
+            'redirects' => 'Redirects',
             // ...
         ];
     }
@@ -179,6 +180,7 @@ class Route extends Element implements ElementInterface
     protected static function defineDefaultTableAttributes(string $source): array
     {
         return [
+            'redirects',
             'entryUri',
             'redirectUri',
             'dateCreated',
@@ -194,6 +196,12 @@ class Route extends Element implements ElementInterface
         $rules = array_merge($rules, $model->rules());
         
         return $rules;
+    }
+
+    public function getRedirects(): int
+    {
+        // Get the total number of redirects for this route
+        return QrManager::getInstance()->routes->getRouteAnalyticsTotal($this->id);
     }
 
     public function getUriFormat(): ?string
@@ -273,7 +281,7 @@ class Route extends Element implements ElementInterface
 
     public function canCreateDrafts(User $user): bool
     {
-        return true;
+        return false;
     }
 
     protected function cpEditUrl(): ?string
@@ -300,6 +308,9 @@ class Route extends Element implements ElementInterface
         }
         $siteSettings = QrManager::getInstance()->settingsService->getSiteSettings($siteId);
 
+        // Get the route analytics
+        $routeAnalytics = QrManager::getInstance()->routes->getRouteDailyAnalytics($this->id, 5);
+
         // Render the metaFields twig file
         return Craft::$app->getView()->renderTemplate('qr-manager/routes/_metafields', [
             'element' => $this,
@@ -307,8 +318,21 @@ class Route extends Element implements ElementInterface
             'entryUri' => $this->entryUri,
             'settings' => $siteSettings,
             'siteUrl' => $site->baseUrl,
+            'routeAnalytics' => $routeAnalytics,
         ]);
 
+    }
+
+
+    public function metadata(): array
+    {
+        // Get the route analytics
+        $totalRedirects = QrManager::getInstance()->routes->getRouteAnalyticsTotal($this->id);
+
+        // Render the metadata twig file
+        return [
+            'Redirects' => $totalRedirects,
+        ];
     }
 
     public function getCardBodyHtml(): string
