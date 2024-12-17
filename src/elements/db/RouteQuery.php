@@ -19,7 +19,7 @@ class RouteQuery extends ElementQuery
 
     public function entryUri($value): self
     {
-        $this->entryUri = "/" . $value;
+        $this->entryUri = $value;
 
         return $this;
     }
@@ -43,6 +43,7 @@ class RouteQuery extends ElementQuery
 
         if ($this->entryUri) {
             $entryUri = $this->entryUri;
+
             $this->subQuery->andWhere(new Expression("`entryUri` REGEXP :entryUri", [':entryUri' => "^/?{$entryUri}"]));
         }
 
